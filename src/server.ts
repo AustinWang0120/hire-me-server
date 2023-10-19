@@ -1,6 +1,12 @@
 import express from "express";
 import type { Request, Response } from "express";
 import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import { connectDatabase } from "./config/database";
+
+dotenv.config();
+
+void connectDatabase();
 
 const app = express();
 
