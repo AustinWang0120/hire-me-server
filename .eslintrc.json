@@ -12,6 +12,7 @@
   },
   "rules": {
     "prettier/prettier": "error",
-    "quotes": ["error", "double"]
+    "quotes": ["error", "double"],
+    "@typescript-eslint/no-invalid-void-type": "off"
   }
 }

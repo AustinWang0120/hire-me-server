@@ -11,11 +11,24 @@ export interface IUser extends Document {
 }
 
 // 定义User模式
-const UserSchema: Schema = new Schema({
-  email: { type: String, required: true, unique: true },
-  username: { type: String, required: true },
-  password: { type: String, required: true },
-});
+const UserSchema: Schema = new Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    username: { type: String, required: true },
+    password: { type: String, required: true },
+  },
+  {
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id.toString(); // 将_id字段转换为id字段string类型
+        delete ret._id; // 删除_id字段
+        delete ret.password; // 删除密码字段
+        delete ret.__v; // 删除版本字段
+        return ret;
+      },
+    },
+  },
+);
 
 // 密码加密前保存
 UserSchema.pre<IUser>("save", async function (next) {
