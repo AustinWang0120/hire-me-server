@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
 import userRoutes from "./routes/users";
+import jobApplicationRoutes from "./routes/jobapplications";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/job-applications", jobApplicationRoutes);
 
 const PORT_NUMBER = parseInt(process.env.PORT as string, 10);
 const PORT: number = isNaN(PORT_NUMBER) ? 3001 : PORT_NUMBER;

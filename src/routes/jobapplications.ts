@@ -1,6 +1,18 @@
 import { Router } from "express";
+import { authenticate } from "../middlewares/authenticate";
+import {
+  getAllApplications,
+  addApplication,
+  updateApplicationStatus,
+  deleteApplication,
+} from "../controllers/jobapplications";
 const router = Router();
 
-// 这里将会连接控制器的函数
+router.use(authenticate);
+
+router.get("/", getAllApplications);
+router.post("/", addApplication);
+router.put("/:applicationId/status", updateApplicationStatus);
+router.delete("/:applicationId", deleteApplication);
 
 export default router;
