@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../types";
 import { JobApplication } from "../models/JobApplication";
+import { User } from "../models/User";
 
 // 1. 查询当前登录用户的所有求职申请记录
 export const getAllApplications = async (
@@ -10,8 +11,14 @@ export const getAllApplications = async (
 ): Promise<Response | void> => {
   try {
     const userId = (req as AuthenticatedRequest).user?.userId;
-    const applications = await JobApplication.find({ user: userId });
-    return res.status(200).json(applications);
+
+    const user = await User.findById(userId).populate("jobApplications");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.status(200).json(user.jobApplications);
   } catch (error) {
     next(error);
   }
@@ -36,6 +43,14 @@ export const addApplication = async (
       user: userId,
     });
     await newApplication.save();
+
+    // 找到当前用户并且更新其jobApplications字段
+    const user = await User.findById(userId);
+    if (user) {
+      user.jobApplications.push(newApplication._id);
+      await user.save();
+    }
+
     return res.status(201).json(newApplication);
   } catch (error) {
     next(error);
@@ -97,6 +112,20 @@ export const deleteApplication = async (
 
     if (!application) {
       return res.status(404).json({ error: "Application not found." });
+    }
+
+    // 找到对应的用户并从其jobApplications字段中删除该申请的引用
+    const user = await User.findById(userId);
+    if (user) {
+      // 使用toString方法将ObjectId转换为字符串，然后进行比较
+      const index = user.jobApplications
+        .map((id) => id.toString())
+        .indexOf(applicationId);
+
+      if (index > -1) {
+        user.jobApplications.splice(index, 1);
+        await user.save();
+      }
     }
 
     await application.deleteOne();

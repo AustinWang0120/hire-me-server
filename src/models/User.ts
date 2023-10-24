@@ -8,6 +8,7 @@ export interface IUser extends Document {
   username: string;
   password: string;
   comparePassword: (candidatePassword: string) => Promise<boolean>;
+  jobApplications: Schema.Types.ObjectId[];
 }
 
 // 定义User模式
@@ -16,6 +17,9 @@ const UserSchema: Schema = new Schema(
     email: { type: String, required: true, unique: true }, // 邮箱字段，必填，唯一
     username: { type: String, required: true }, // 用户名字段，必填
     password: { type: String, required: true }, // 密码字段，必填
+    jobApplications: [
+      { type: Schema.Types.ObjectId, ref: "JobApplication", required: true },
+    ], // 工作申请字段，必填
   },
   {
     toJSON: {

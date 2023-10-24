@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../types";
 import { User } from "../models/User";
+import { CustomError } from "../errors/CustomError";
 import jwt from "jsonwebtoken";
 
 // 注册新用户
@@ -16,7 +17,7 @@ export const register = async (
     const existingUser = await User.findOne({ email });
     // 如果用户已经存在，则返回错误信息
     if (existingUser !== null) {
-      return res.status(400).json({ error: "Email already exists!" });
+      return next(new CustomError("Email already exists!", 400));
     }
 
     // 创建新用户
@@ -42,19 +43,21 @@ export const login = async (
     // 检查用户是否存在
     const user = await User.findOne({ email });
     if (user === null) {
-      return res.status(400).json({ error: "Invalid email or password." });
+      return next(new CustomError("Invalid email or password.", 400));
     }
 
     // 检查密码是否正确
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid email or password." });
+      return next(new CustomError("Invalid email or password.", 400));
     }
 
     // 生成JWT
     const jwtSecret = process.env.JWT_SECRET;
     if (jwtSecret === undefined) {
-      throw new Error("JWT_SECRET is not defined in .env file");
+      return next(
+        new CustomError("JWT_SECRET is not defined in .env file", 500),
+      );
     }
     const payload = { userId: user._id };
     const token = jwt.sign(payload, jwtSecret, {
@@ -82,7 +85,7 @@ export const getMe = async (
 
     // 如果用户不存在，则返回错误信息
     if (user === undefined) {
-      return res.status(400).json({ error: "User not found." });
+      return next(new CustomError("User not found.", 400));
     }
 
     // 返回用户
@@ -124,7 +127,7 @@ export const updateEmail = async (
     // 检查用户是否已经存在
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "Email already exists!" });
+      return next(new CustomError("Email already exists!", 400));
     }
 
     // 更新用户信息
@@ -172,13 +175,13 @@ export const updatePassword = async (
     // 检查用户是否存在
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({ error: "User not found." });
+      return next(new CustomError("User not found.", 400));
     }
 
     // 检查旧密码是否正确
     const isMatch = await user.comparePassword(oldPassword);
     if (!isMatch) {
-      return res.status(400).json({ error: "Current password is incorrect." });
+      return next(new CustomError("Invalid password.", 400));
     }
 
     // 更新密码
