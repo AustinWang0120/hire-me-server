@@ -15,16 +15,16 @@ export interface IJobApplication extends Document {
 // 定义JobApplication模式
 const JobApplicationSchema: Schema = new Schema(
   {
-    applicationDate: { type: Date, required: true },
-    companyName: { type: String, required: true },
-    positionName: { type: String, required: true },
-    positionLink: { type: String, required: true },
+    applicationDate: { type: Date, required: true }, // 申请日期字段，必填
+    companyName: { type: String, required: true }, // 公司名称字段，必填
+    positionName: { type: String, required: true }, // 职位名称字段，必填
+    positionLink: { type: String, required: true }, // 职位链接字段，必填
     status: {
       type: String,
       enum: ["pending", "interview", "accepted", "rejected"],
       required: true,
-    },
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    }, // 状态字段，必填，只能是pending、interview、accepted、rejected中的一个
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true }, // 用户字段，必填
   },
   {
     toJSON: {
@@ -32,7 +32,7 @@ const JobApplicationSchema: Schema = new Schema(
         ret.id = ret._id.toString(); // 将_id字段转换为id字段string类型
         delete ret._id; // 删除_id字段
         delete ret.__v; // 删除版本字段
-        return ret;
+        return ret; // 返回转换后的对象
       },
     },
   },
