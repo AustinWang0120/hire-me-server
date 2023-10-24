@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "../types";
 import { JobApplication } from "../models/JobApplication";
 import { User } from "../models/User";
+import { CustomError } from "../errors/CustomError";
 
 // 1. 查询当前登录用户的所有求职申请记录
 export const getAllApplications = async (
@@ -15,7 +16,7 @@ export const getAllApplications = async (
     const user = await User.findById(userId).populate("jobApplications");
 
     if (!user) {
-      return res.status(404).json({ error: "User not found." });
+      return next(new CustomError("User not found.", 400));
     }
 
     return res.status(200).json(user.jobApplications);
@@ -74,7 +75,7 @@ export const updateApplicationStatus = async (
     });
 
     if (!application) {
-      return res.status(404).json({ error: "Application not found." });
+      return next(new CustomError("Application not found.", 404));
     }
 
     if (
@@ -83,7 +84,7 @@ export const updateApplicationStatus = async (
       status !== "accepted" &&
       status !== "rejected"
     ) {
-      return res.status(400).json({ error: "Status invalid." });
+      return next(new CustomError("Status invalid.", 400));
     }
 
     application.status = status;
@@ -111,7 +112,7 @@ export const deleteApplication = async (
     });
 
     if (!application) {
-      return res.status(404).json({ error: "Application not found." });
+      return next(new CustomError("Application not found.", 404));
     }
 
     // 找到对应的用户并从其jobApplications字段中删除该申请的引用
