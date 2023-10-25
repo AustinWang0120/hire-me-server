@@ -6,6 +6,8 @@ import userRoutes from "./routes/users";
 import jobApplicationRoutes from "./routes/jobapplications";
 import notFound from "./middlewares/notFound";
 import errorHandler from "./middlewares/errorHandlers";
+import { graphqlHTTP } from "express-graphql";
+import schema from "./graphql/schema";
 
 dotenv.config(); // 读取环境变量
 
@@ -15,6 +17,14 @@ const app = express(); // 创建 express 应用
 
 app.use(bodyParser.json()); // 解析请求体中的 JSON 数据
 app.use(bodyParser.urlencoded({ extended: true })); // 解析请求体中的 urlencoded 数据
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    graphiql: true,
+  }),
+);
 
 app.use("/api/v1/users", userRoutes); // 用户路由
 app.use("/api/v1/job-applications", jobApplicationRoutes); // 工作申请记录路由
